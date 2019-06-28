@@ -24,18 +24,17 @@
    :bind (fn [fm]
            (let [bound (atom [])
                  res-atom (atom nil)
-                 res {:get-bound #(@bound)
+                 res {:get-bound #(-> @bound)
                       :bound? true
                       :bind (fn [fm]
                               (swap! bound conj fm)
                               @res-atom)
                       :main (fn []
-                              {:cont {}
-                               :free (fn [] (free (fm v)))})}]
+                              {:cont {:skip-interpret? true :v v}
+                               :free (fn [& args] (free (fm v)))})}]
              (reset! res-atom res)
              @res-atom))})
 
-(def return pure)
 (defn liftf [command] (free ((:fmap command) pure)))
 
 (defn make-generic-interpreter [sym]

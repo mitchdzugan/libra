@@ -1,5 +1,5 @@
 (ns libra.interpret
-  (:require [libra.free :refer [pure free return bind]]
+  (:require [libra.free :refer [pure free bind]]
             [libra.inject :refer [make-inject]]
             [libra.utils :as utils]))
 
@@ -7,8 +7,10 @@
   (if pure? value
       (let [{:keys [get-bound main]} (if bound? freem (bind freem pure))
             bound (get-bound)
-            {:keys [cont free]} (main)
-            {{:keys [value]} :value} ((:process interpreter) cont)
+            {:keys [cont free] :as oh} (main)
+            value (if (:skip-interpret? cont)
+                    (:v cont)
+                    (get-in ((:process interpreter) cont) [:value :value]))
             next (free value)
             res (interpret-r interpreter (:cont next))]
         (reduce (fn [res fm] (interpret-r interpreter (fm res))) res bound))))
