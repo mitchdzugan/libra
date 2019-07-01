@@ -42,14 +42,16 @@
     (let [funcs (nth args 0 {})
           initial-state (nth args 1 nil)
           state (atom initial-state)
-          process (fn [{:keys [args f source]}]
+          process (fn [{:keys [args f source]} interpret-with-overrides]
                     (let [next (fn [& args]
                                  (let [res (nth args 0 nil)
                                        new-state (nth args 1 @state)]
                                    (reset! state new-state)
                                    (-> res f pure)))]
                       ((get funcs source)
-                       {:next next :state @state :args args})))]
+                       {:next next :state @state :args args
+                        :interpret-with-overrides interpret-with-overrides
+                        :interpret interpret-with-overrides})))]
       {:symbol sym :process process :get-state (fn [_] @state)})))
 
 (defn generic-get-state [i-res sym]

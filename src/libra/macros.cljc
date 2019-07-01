@@ -122,8 +122,19 @@
 
 (defmacro ffn [& statements]
   (apply (add-fdo 'fn) statements))
-(defmacro deff [& statements]
-  (apply (add-fdo 'def) statements))
+
+(defn to-safe-free [freef]
+  (let [free (atom (freef))]
+    (if (not (:bound? @free)) @free
+        {:safe-free? true
+         :bind (fn [& args]
+                 (let [res (apply bind @free args)]
+                   (reset! free (freef))
+                   res))})))
+(defmacro deff [name & statements]
+  `(def ~name
+     (to-safe-free (ffn [] ~@statements))))
+
 (defmacro deffn [& statements]
   (apply (add-fdo 'defn) statements))
 (defmacro whenf [bool & statements]

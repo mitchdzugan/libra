@@ -2,8 +2,12 @@
   (:require [libra.free :as lfree]
             [libra.interpret :as linterpret]
             [libra.inject :as inject]
-            [libra.macros :as macros]))
+            [libra.utils :as utils]
+            [libra.macros :as macros]
+            [libra.frp]
+            [libra.dom]))
 
+(def index-by utils/index-by)
 (def bind lfree/bind)
 (def free lfree/free)
 (def pure lfree/pure)
@@ -46,7 +50,6 @@
                     (apply value-from-args args)))))
 (defn setter-in [fields-from-args value-from-args]
   (updater (fn [state & args]
-             (println args)
              (assoc-in state
                        (apply fields-from-args args)
                        (apply value-from-args args)))))
